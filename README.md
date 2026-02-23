@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Kicks E-Commerce - Premium Sneaker Store
 
-## Getting Started
+A modern, responsive e-commerce landing page built with Next.js, featuring a clean and premium design for sneaker enthusiasts. This project was developed as a design polish task to match specific high-fidelity UI requirements.
 
-First, run the development server:
+## 🚀 Live Demo
+**[kicks-ecom-task-fawn.vercel.app](https://kicks-ecom-task-fawn.vercel.app/)**
 
+## ✨ Features
+- **Modern Hero Section**: High-impact slider with bold typography and interactive call-to-actions.
+- **New Drops Grid**: Responsive product grid (2 columns on mobile, 4 on desktop) with smart text truncation and price tags.
+- **Dynamic Categories**: Dark-themed category navigation with interactive cards and SVG icons.
+- **Customer Reviews**: A dedicated reviews section with star ratings, user avatars, and product images.
+- **Premium Footer**: Professional footer with newsletter signup, social links, and a signature watermark.
+- **Seamless Responsiveness**: Fully optimized for mobile, tablet, and desktop viewports.
+
+## 🛠️ Tech Stack
+- **Framework**: [Next.js 16 (App Router)](https://nextjs.org/)
+- **Library**: [React 19](https://reactjs.org/)
+- **Styling**: [Tailwind CSS 4](https://tailwindcss.com/)
+- **Icons**: [React Icons](https://react-icons.github.io/react-icons/)
+- **HTTP Client**: [Axios](https://axios-http.com/)
+- **Deployment**: [Vercel](https://vercel.com/)
+
+## 📦 Getting Started
+
+### Prerequisites
+- Node.js 18.x or later
+- npm or yarn
+
+### Installation
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/iasraful/kicks-ecom-task.git
+   ```
+2. Navigate to the project directory:
+   ```bash
+   cd kicks-ecom-task
+   ```
+3. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+### Development
+Run the development server:
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
-
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## 📝 Design Implementation Notes
+- **Typography**: Uses custom font sizes and tracking (e.g., `tracking-[-0.05em]`) to achieve a premium look.
+- **Color Palette**: 
+  - Brand Blue: `#4a69e2`
+  - Dark Charcoal: `#232321`
+  - Price Yellow: `#ffa52f`
+- **Mobile Optimization**: Implemented custom JS-based truncation for product titles (24 chars) to prevent layout breaks on small screens.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🤝 Contribution
+This project was built for a design implementation task. Feel free to explore the code!
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+Developed by [Asraful](https://github.com/iasraful)

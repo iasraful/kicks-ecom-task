@@ -1,26 +1,22 @@
 "use client";
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useState } from 'react';
 import Link from 'next/link';
+import { productsApi } from '@/lib/api';
+import { useApi } from '@/hooks/useApi';
+import { LoadingState, ErrorState } from '@/app/components/ApiStates';
 
 const CategoryPage = () => {
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [startIdx, setStartIdx] = useState(0);
   const visibleCount = 2;
 
-  useEffect(() => {
-    axios.get('https://api.escuelajs.co/api/v1/categories')
-      .then(res => {
-        setCategories(res.data);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError('Failed to load categories');
-        setLoading(false);
-      });
-  }, []);
+  const {
+    data: categoriesData,
+    loading,
+    error,
+    execute: retry
+  } = useApi(productsApi.getCategories);
+
+  const categories = categoriesData || [];
 
   const handlePrev = () => {
     setStartIdx(idx => Math.max(idx - visibleCount, 0));
@@ -44,9 +40,9 @@ const CategoryPage = () => {
           </div>
         </div>
         {loading ? (
-          <div className="text-center py-12 text-lg font-semibold text-gray-300">Loading...</div>
+          <LoadingState className="text-gray-300" />
         ) : error ? (
-          <div className="text-center py-12 text-lg font-semibold text-red-400">{error}</div>
+          <ErrorState message={error} onRetry={retry} className="text-red-400" />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {categories.slice(startIdx, startIdx + visibleCount).map(category => (

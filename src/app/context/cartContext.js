@@ -1,31 +1,56 @@
 "use client";
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-  const [cartItems, setCartItems] = useState([]);
+  // Initialize from localStorage if available
+  const [cartItems, setCartItems] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('kicks_cart');
+        return saved ? JSON.parse(saved) : [];
+      } catch (e) {
+        console.error("Failed to parse cart from localStorage", e);
+        return [];
+      }
+    }
+    return [];
+  });
+
+  const [notification, setNotification] = useState(null);
+
+  // Persist to localStorage whenever cart changes
+  useEffect(() => {
+    localStorage.setItem('kicks_cart', JSON.stringify(cartItems));
+  }, [cartItems]);
+
+  const showNotification = (message) => {
+    setNotification(message);
+    setTimeout(() => setNotification(null), 3000);
+  };
 
   // Add to cart function
   const addToCart = (product) => {
     const existingItem = cartItems.find(item => item.id === product.id);
-    
+
     if (existingItem) {
       // If product already in cart, increase quantity
-      setCartItems(cartItems.map(item =>
+      setCartItems(prev => prev.map(item =>
         item.id === product.id
           ? { ...item, quantity: item.quantity + (product.quantity || 1) }
           : item
       ));
     } else {
       // Add new product to cart
-      setCartItems([...cartItems, { ...product, quantity: product.quantity || 1 }]);
+      setCartItems(prev => [...prev, { ...product, quantity: product.quantity || 1 }]);
     }
+    showNotification(`✓ ${product.name || product.title} added to cart!`);
   };
 
   // Remove from cart function
   const removeFromCart = (productId) => {
-    setCartItems(cartItems.filter(item => item.id !== productId));
+    setCartItems(prev => prev.filter(item => item.id !== productId));
   };
 
   // Update quantity function
@@ -34,7 +59,7 @@ export const CartProvider = ({ children }) => {
       removeFromCart(productId);
       return;
     }
-    setCartItems(cartItems.map(item =>
+    setCartItems(prev => prev.map(item =>
       item.id === productId ? { ...item, quantity } : item
     ));
   };
@@ -56,6 +81,7 @@ export const CartProvider = ({ children }) => {
 
   const value = {
     cartItems,
+    notification,
     addToCart,
     removeFromCart,
     updateQuantity,
@@ -67,6 +93,12 @@ export const CartProvider = ({ children }) => {
   return (
     <CartContext.Provider value={value}>
       {children}
+      {/* Global Notification Toast - Absolute positioning to avoid layout shift */}
+      {notification && (
+        <div className="fixed bottom-8 right-8 bg-black text-white px-6 py-4 rounded-xl font-bold shadow-2xl z-[100] border border-gray-800 animate-bounce-in">
+          {notification}
+        </div>
+      )}
     </CartContext.Provider>
   );
 };

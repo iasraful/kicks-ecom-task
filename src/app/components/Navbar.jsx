@@ -17,7 +17,7 @@ function Navbar() {
     <nav className="bg-white border-b-2 border-gray-200 rounded-2xl">
       {/* Desktop Navbar */}
       <div className="hidden md:flex items-center justify-between px-6 lg:px-12 py-4">
-        
+
         {/* Left: Navigation Links */}
         <div className="flex items-center gap-8">
           <a href="#" className="text-sm font-bold hover:text-gray-700 transition flex items-center gap-2">
@@ -33,7 +33,7 @@ function Navbar() {
               Women
             </button>
           </div>
-           <div className="relative group">
+          <div className="relative group">
             <Link href="/product" className="text-sm font-bold hover:text-gray-700 transition">
               All Products
             </Link>
@@ -100,7 +100,7 @@ function Navbar() {
             <Link href="/product/women" className="text-sm font-bold hover:text-gray-700 transition">
               Women
             </Link>
-              <Link href="/product" className="text-sm font-bold hover:text-gray-700 transition">
+            <Link href="/product" className="text-sm font-bold hover:text-gray-700 transition">
               All Products
             </Link>
           </div>

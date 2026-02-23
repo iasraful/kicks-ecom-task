@@ -1,25 +1,17 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React from "react";
 import Link from "next/link";
+import { productsApi } from "@/lib/api";
+import { useApi } from "@/hooks/useApi";
+import { LoadingState, ErrorState } from "./ApiStates";
 
 const NewDrop = () => {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    axios
-      .get("https://api.escuelajs.co/api/v1/products")
-      .then((res) => {
-        setProducts(res.data.slice(0, 4));
-        setLoading(false);
-      })
-      .catch(() => {
-        setError("Failed to load products");
-        setLoading(false);
-      });
-  }, []);
+  const {
+    data: products = [],
+    loading,
+    error,
+    execute: retry
+  } = useApi(() => productsApi.getAll({ limit: 4 }));
 
   return (
     <section className=" py-12 px-4 md:px-12  mb-10 ">
@@ -37,18 +29,14 @@ const NewDrop = () => {
 
       {/* Content */}
       {loading ? (
-        <div className="text-center py-12 text-lg font-semibold text-gray-500">
-          Loading...
-        </div>
+        <LoadingState className="text-gray-500" />
       ) : error ? (
-        <div className="text-center py-12 text-lg font-semibold text-red-500">
-          {error}
-        </div>
+        <ErrorState message={error} onRetry={retry} />
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {products.map((product) => (
+          {products.slice(0, 4).map((product) => (
             <div key={product.id} className="flex flex-col">
-              
+
               {/* Image Box */}
               <div className="relative bg-[#e7e7e7] rounded-3xl p-5">
                 <span className="absolute top-3 left-3 bg-blue-600 text-white text-[10px] md:text-xs font-bold px-3 py-1 rounded-full">

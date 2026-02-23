@@ -1,73 +1,54 @@
 
 "use client";
-import React, { useEffect, useState, Suspense } from 'react';
-import axios from 'axios';
-import Link from 'next/link';
+import React, { useState, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { FiFilter, FiX } from 'react-icons/fi';
 import { useCart } from '../context/cartContext';
+import { productsApi } from '@/lib/api';
+import { useApi } from '@/hooks/useApi';
+import { LoadingState, ErrorState, EmptyState } from '@/app/components/ApiStates';
+import Link from 'next/link';
 
 const ProductPageContent = () => {
   const searchParams = useSearchParams();
   const { addToCart } = useCart();
   const categoryFromUrl = searchParams.get('category') || 'all';
-  
-  const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+
   const [showFilters, setShowFilters] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(categoryFromUrl);
   const [priceRange, setPriceRange] = useState([0, 1000]);
-  const [categories, setCategories] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [hoveredProductId, setHoveredProductId] = useState(null);
-  const [alertMessage, setAlertMessage] = useState('');
   const itemsPerPage = 12;
 
-  useEffect(() => {
-    setSelectedCategory(categoryFromUrl);
-  }, [categoryFromUrl]);
+  const {
+    data: products = [],
+    loading,
+    error,
+    execute: retry
+  } = useApi(productsApi.getAll);
 
-  useEffect(() => {
-    setLoading(true);
-    axios.get('https://api.escuelajs.co/api/v1/products')
-      .then(res => {
-        setProducts(res.data.slice(0, 50));
-        // Extract unique categories
-        const cats = [...new Set(res.data.map(p => p.category?.name).filter(Boolean))];
-        setCategories(cats);
-        setLoading(false);
-      })
-      .catch(err => {
-        setError('Failed to load products');
-        setLoading(false);
-      });
-  }, []);
+  // Derive unique categories from fetched products
+  const categories = useMemo(() => {
+    if (!products) return [];
+    return [...new Set(products.map(p => p.category?.name).filter(Boolean))];
+  }, [products]);
 
-  useEffect(() => {
-    let filtered = products;
-
-    // Filter by category
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(p => p.category?.name === selectedCategory);
-    }
-
-    // Filter by price
-    filtered = filtered.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1]);
-
-    setFilteredProducts(filtered);
-    setCurrentPage(1); // Reset to first page when filters change
+  // Filtering logic (Logic Refactor, UI stays the same)
+  const filteredProducts = useMemo(() => {
+    if (!products) return [];
+    return products.filter(p => {
+      const matchCategory = selectedCategory === 'all' || p.category?.name === selectedCategory;
+      const matchPrice = p.price >= priceRange[0] && p.price <= priceRange[1];
+      return matchCategory && matchPrice;
+    });
   }, [products, selectedCategory, priceRange]);
+
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const paginatedProducts = filteredProducts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
     <div className="bg-[#ecebe7] min-h-screen py-8">
-      {/* Alert Notification */}
-      {alertMessage && (
-        <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg font-bold shadow-lg z-50 animate-pulse">
-          {alertMessage}
-        </div>
-      )}
       <div className="container mx-auto px-2 sm:px-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
@@ -84,9 +65,8 @@ const ProductPageContent = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-6">
           {/* Sidebar Filters */}
           <div
-            className={`${
-              showFilters ? 'block' : 'hidden'
-            } md:block md:col-span-1 bg-white rounded-2xl p-6 h-fit sticky top-4`}
+            className={`${showFilters ? 'block' : 'hidden'
+              } md:block md:col-span-1 bg-white rounded-2xl p-6 h-fit sticky top-4`}
           >
             <div className="flex items-center justify-between mb-6 md:hidden">
               <h2 className="text-xl font-bold text-black">Filters</h2>
@@ -108,6 +88,7 @@ const ProductPageContent = () => {
                     onChange={(e) => {
                       setSelectedCategory(e.target.value);
                       setShowFilters(false);
+                      setCurrentPage(1);
                     }}
                     className="w-4 h-4"
                   />
@@ -123,6 +104,7 @@ const ProductPageContent = () => {
                       onChange={(e) => {
                         setSelectedCategory(e.target.value);
                         setShowFilters(false);
+                        setCurrentPage(1);
                       }}
                       className="w-4 h-4"
                     />
@@ -143,7 +125,10 @@ const ProductPageContent = () => {
                     min="0"
                     max="1000"
                     value={priceRange[0]}
-                    onChange={(e) => setPriceRange([parseInt(e.target.value), priceRange[1]])}
+                    onChange={(e) => {
+                      setPriceRange([parseInt(e.target.value), priceRange[1]]);
+                      setCurrentPage(1);
+                    }}
                     className="w-full"
                   />
                 </div>
@@ -154,7 +139,10 @@ const ProductPageContent = () => {
                     min="0"
                     max="1000"
                     value={priceRange[1]}
-                    onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
+                    onChange={(e) => {
+                      setPriceRange([priceRange[0], parseInt(e.target.value)]);
+                      setCurrentPage(1);
+                    }}
                     className="w-full"
                   />
                 </div>
@@ -166,6 +154,7 @@ const ProductPageContent = () => {
               onClick={() => {
                 setSelectedCategory('all');
                 setPriceRange([0, 1000]);
+                setCurrentPage(1);
               }}
               className="w-full bg-gray-200 hover:bg-gray-300 text-black font-bold py-2 px-4 rounded-lg transition"
             >
@@ -176,18 +165,18 @@ const ProductPageContent = () => {
           {/* Products Grid */}
           <div className="md:col-span-3 lg:col-span-4">
             {loading ? (
-              <div className="text-center py-12 text-lg font-semibold text-gray-500">Loading...</div>
+              <LoadingState className="py-24" />
             ) : error ? (
-              <div className="text-center py-12 text-lg font-semibold text-red-500">{error}</div>
+              <ErrorState message={error} onRetry={retry} />
             ) : filteredProducts.length > 0 ? (
               <>
                 <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
-                  {filteredProducts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((product) => (
+                  {paginatedProducts.map((product) => (
                     <div
                       key={product.id}
                       className="flex flex-col bg-white rounded-2xl border-2 border-gray-200 overflow-hidden shadow-sm hover:shadow-xl transition duration-300"
                     >
-                      {/* Image Container - Clickable */}
+                      {/* Image Container */}
                       <Link
                         href={`/product/${product.id}`}
                         className="relative w-full h-40 sm:h-52 bg-gray-100 flex items-center justify-center overflow-hidden cursor-pointer group"
@@ -198,9 +187,7 @@ const ProductPageContent = () => {
                           src={
                             hoveredProductId === product.id && product.images && product.images[1]
                               ? product.images[1]
-                              : product.images && product.images[0]
-                              ? product.images[0]
-                              : 'https://via.placeholder.com/300x200?text=No+Image'
+                              : product.images?.[0] || 'https://via.placeholder.com/300x200?text=No+Image'
                           }
                           alt={product.title}
                           className="w-full h-full object-contain p-2 hover:scale-110 transition duration-300"
@@ -222,27 +209,16 @@ const ProductPageContent = () => {
                         {/* Buttons */}
                         <div className="flex items-center gap-2 mt-auto">
                           <button
-                            onClick={() => {
-                              addToCart({
-                                id: product.id,
-                                name: product.title,
-                                price: product.price,
-                                image: product.images?.[0] || 'https://via.placeholder.com/300x200',
-                                quantity: 1
-                              });
-                              setAlertMessage(`✓ ${product.title} added to cart!`);
-                              setTimeout(() => setAlertMessage(''), 3000);
-                            }}
+                            onClick={() => addToCart({
+                              id: product.id,
+                              name: product.title,
+                              price: product.price,
+                              image: product.images?.[0] || 'https://via.placeholder.com/300x200',
+                            })}
                             className="flex-1 bg-blue-600 text-white text-xs font-bold py-2 px-3 rounded-lg hover:bg-blue-700 transition"
                           >
                             Add to Cart
                           </button>
-                          {/* <Link
-                            href={`/product/${product.id}`}
-                            className="bg-black text-white text-xs font-bold py-2 px-3 sm:px-4 rounded-lg hover:bg-gray-800 transition whitespace-nowrap"
-                          >
-                            View
-                          </Link> */}
                         </div>
                       </div>
                     </div>
@@ -259,23 +235,22 @@ const ProductPageContent = () => {
                     ← Prev
                   </button>
 
-                  {[...Array(Math.ceil(filteredProducts.length / itemsPerPage))].map((_, idx) => (
+                  {[...Array(totalPages)].map((_, idx) => (
                     <button
                       key={idx + 1}
                       onClick={() => setCurrentPage(idx + 1)}
-                      className={`px-3 py-2 rounded-lg font-bold transition ${
-                        currentPage === idx + 1
+                      className={`px-3 py-2 rounded-lg font-bold transition ${currentPage === idx + 1
                           ? 'bg-blue-600 text-white'
                           : 'bg-white text-black border-2 border-gray-300 hover:border-black'
-                      }`}
+                        }`}
                     >
                       {idx + 1}
                     </button>
                   ))}
 
                   <button
-                    onClick={() => setCurrentPage(Math.min(Math.ceil(filteredProducts.length / itemsPerPage), currentPage + 1))}
-                    disabled={currentPage === Math.ceil(filteredProducts.length / itemsPerPage)}
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
                     className="bg-black text-white font-bold py-2 px-4 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 transition"
                   >
                     Next →
@@ -288,9 +263,14 @@ const ProductPageContent = () => {
                 </div>
               </>
             ) : (
-              <div className="text-center py-12 text-lg font-semibold text-gray-500">
-                No products found. Try adjusting your filters.
-              </div>
+              <EmptyState
+                message="No products found. Try adjusting your filters."
+                onReset={() => {
+                  setSelectedCategory('all');
+                  setPriceRange([0, 1000]);
+                  setCurrentPage(1);
+                }}
+              />
             )}
           </div>
         </div>
@@ -302,7 +282,7 @@ const ProductPageContent = () => {
 // Page wrapper with Suspense for useSearchParams
 export default function ProductPage() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center py-12"><p>Loading products...</p></div>}>
+    <Suspense fallback={<LoadingState className="py-24" message="Loading products..." />}>
       <ProductPageContent />
     </Suspense>
   );

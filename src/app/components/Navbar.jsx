@@ -14,7 +14,7 @@ function Navbar() {
   };
 
   return (
-    <nav className="bg-white border-b-2 border-gray-200 rounded-2xl">
+    <nav className="bg-white border-b-2 border-gray-200 rounded-2xl mx-4 md:mx-8">
       {/* Desktop Navbar */}
       <div className="hidden md:flex items-center justify-between px-6 lg:px-12 py-4">
 

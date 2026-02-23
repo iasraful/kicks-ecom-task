@@ -25,13 +25,13 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-      <CartProvider>
-        <main className="py-4 md:py-8 px-4 md:px-12">
-          <Navbar/>
-          {children}
-          <Footer/>
-        </main>
-      </CartProvider>
+        <CartProvider>
+          <main className="py-4 md:py-8">
+            <Navbar />
+            {children}
+            <Footer />
+          </main>
+        </CartProvider>
       </body>
     </html>
   );

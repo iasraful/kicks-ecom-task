@@ -181,16 +181,24 @@ const RelatedProducts = ({ currentCategory, currentId }) => {
   if (!loading && related.length === 0) return null;
 
   return (
-    <section className="w-full mx-auto mt-12 mb-8 px-2 sm:px-4">
-      <div className=" ">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-black uppercase">You may also like</h2>
+    <section className="w-full mt-12 mb-8 px-2 sm:px-4">
+      <div>
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#232321]">You may also like</h2>
           <div className="flex gap-2">
-            <button onClick={handlePrev} disabled={totalPages <= 1} className="bg-gray-400 hover:bg-gray-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg transition disabled:opacity-50">
-              &#8249;
+            <button
+              onClick={handlePrev}
+              disabled={totalPages <= 1}
+              className="bg-[#232321] hover:bg-black text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg transition disabled:opacity-30"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
             </button>
-            <button onClick={handleNext} disabled={totalPages <= 1} className="bg-gray-400 hover:bg-gray-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg transition disabled:opacity-50">
-              &#8250;
+            <button
+              onClick={handleNext}
+              disabled={totalPages <= 1}
+              className="bg-[#232321] hover:bg-black text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg transition disabled:opacity-30"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
             </button>
           </div>
         </div>
@@ -199,43 +207,58 @@ const RelatedProducts = ({ currentCategory, currentId }) => {
         ) : error ? (
           <div className="text-center py-12 text-lg font-semibold text-red-500">{error}</div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {displayedProducts.map((product) => (
-              <div key={product.id} className="flex flex-col">
+          <>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+              {displayedProducts.map((product) => (
+                <div key={product.id} className="flex flex-col group">
 
-                {/* Image Box */}
-                <div className="relative bg-[#e7e7e7] rounded-3xl p-5 aspect-square flex items-center justify-center">
-                  <span className="absolute top-3 left-3 bg-blue-600 text-white text-[10px] md:text-xs font-bold px-3 py-1 rounded-full z-10">
-                    New
-                  </span>
+                  {/* Image Box */}
+                  <div className="relative bg-white rounded-2xl sm:rounded-[28px] overflow-hidden p-3 sm:p-6 flex flex-col items-center justify-center">
+                    <span className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 bg-[#4a69e2] text-white text-[9px] sm:text-xs font-bold px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-tl-lg rounded-br-lg sm:rounded-tl-xl sm:rounded-br-xl uppercase z-10">
+                      New
+                    </span>
 
-                  <img
-                    src={
-                      product.images?.[0] ||
-                      "https://via.placeholder.com/300"
-                    }
-                    alt={product.title}
-                    className="w-full h-full object-contain hover:scale-110 transition duration-300"
-                  />
+                    <img
+                      src={
+                        product.images?.[0] ||
+                        "https://via.placeholder.com/300"
+                      }
+                      alt={product.title}
+                      className="w-full h-32 sm:h-48 lg:h-56 object-contain transition-transform duration-300 group-hover:scale-105"
+                    />
+                  </div>
+
+                  {/* Title */}
+                  <h3 className="mt-3 text-xs sm:text-sm font-bold uppercase leading-tight text-[#232321] line-clamp-2 min-h-[2.5rem]">
+                    {product.title}
+                  </h3>
+
+                  {/* Button */}
+                  <Link href={`/product/${product.id}`}
+                    className="mt-2 sm:mt-3 bg-[#232321] hover:bg-black text-white text-[10px] sm:text-xs font-bold py-2.5 sm:py-3 rounded-lg w-full flex justify-center gap-1 sm:gap-2 tracking-wide transition"
+                  >
+                    VIEW PRODUCT —
+                    <span className="text-[#ffa52f]">
+                      ${product.price}
+                    </span>
+                  </Link>
                 </div>
-
-                {/* Title */}
-                <h3 className="mt-4 text-xs md:text-sm font-extrabold uppercase leading-tight line-clamp-2 min-h-[2.5rem]">
-                  {product.title}
-                </h3>
-
-                {/* Button */}
-                <Link href={`/product/${product.id}`}
-                  className="mt-3 bg-black hover:bg-gray-800 text-white text-xs font-bold py-3 rounded-lg w-full flex justify-center gap-2 transition"
-                >
-                  VIEW PRODUCT -
-                  <span className="text-yellow-400">
-                    ${product.price}
-                  </span>
-                </Link>
+              ))}
+            </div>
+            {/* Page Indicators */}
+            {totalPages > 1 && (
+              <div className="flex gap-2 mt-6 justify-center">
+                {Array.from({ length: totalPages }).map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setCurrentPage(idx)}
+                    className={`rounded-full transition-all ${idx === currentPage ? 'bg-[#4a69e2] w-8 h-2.5' : 'bg-gray-300 w-2.5 h-2.5'}`}
+                    aria-label={`Page ${idx + 1}`}
+                  />
+                ))}
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </div>
     </section>
